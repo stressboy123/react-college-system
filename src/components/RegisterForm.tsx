@@ -1,12 +1,11 @@
 import { useState } from 'react'
-import { Button, Form, Input, message, Typography, Select } from 'antd'
-import { UserOutlined, LockOutlined } from '@ant-design/icons'
+import { Button, Form, Input, message, Typography } from 'antd'
+import { UserOutlined, LockOutlined, UserAddOutlined } from '@ant-design/icons'
 import { Link, useNavigate } from 'react-router-dom'
 import { register } from '@/api/authApi'
-import type { RegisterDTO } from '@/types/api'
+import type { RegisterDTO, Result } from '@/types/api'
 
 const { Title } = Typography
-const { Option } = Select
 
 const RegisterForm = () => {
   const [loading, setLoading] = useState(false)
@@ -17,7 +16,7 @@ const RegisterForm = () => {
     username: string
     password: string
     confirmPwd: string
-    role: 'user' | 'admin'
+    nickname?: string
   }) => {
     setLoading(true)
     try {
@@ -26,19 +25,34 @@ const RegisterForm = () => {
         message.error('两次密码不一致！')
         return
       }
+      if (values.username.length < 3 || values.username.length > 50) {
+        message.error('用户名长度需在3-50之间！')
+        return
+      }
+      if (values.password.length < 6 || values.password.length > 20) {
+        message.error('密码长度需在6-20之间！')
+        return
+      }
 
-      // 构造注册参数
+      // 构造注册参数（匹配后端RegisterDTO）
       const registerData: RegisterDTO = {
         username: values.username,
         password: values.password,
-        role: values.role
+        nickname: values.nickname
       }
 
-      await register(registerData)
-      message.success('注册成功，请登录！')
-      navigate('/login') // 跳登录页
+      const response = await register(registerData)
+      const result: Result<string> = response.data
+      
+      if (result.success && result.code === 200) {
+        message.success(result.msg || '注册成功，请登录！')
+        navigate('/login') // 跳登录页
+      } else {
+        message.error(result.msg || '注册失败')
+      }
     } catch (err) {
       console.error('注册失败：', err)
+      message.error('注册失败，请稍后重试')
     } finally {
       setLoading(false)
     }
@@ -61,7 +75,15 @@ const RegisterForm = () => {
           label="账号"
           rules={[{ required: true, message: '请输入账号！' }]}
         >
-          <Input prefix={<UserOutlined />} placeholder="请输入账号" />
+          <Input prefix={<UserOutlined />} placeholder="请输入账号（3-50位）" />
+        </Form.Item>
+
+        <Form.Item
+          name="nickname"
+          label="昵称"
+          rules={[{ required: false }]} // 后端nickname非必填
+        >
+          <Input prefix={<UserAddOutlined />} placeholder="请输入昵称（选填）" />
         </Form.Item>
 
         <Form.Item
@@ -69,7 +91,7 @@ const RegisterForm = () => {
           label="密码"
           rules={[{ required: true, message: '请输入密码！' }]}
         >
-          <Input.Password prefix={<LockOutlined />} placeholder="请输入密码" />
+          <Input.Password prefix={<LockOutlined />} placeholder="请输入密码（6-20位）" />
         </Form.Item>
 
         <Form.Item
@@ -78,17 +100,6 @@ const RegisterForm = () => {
           rules={[{ required: true, message: '请确认密码！' }]}
         >
           <Input.Password prefix={<LockOutlined />} placeholder="请确认密码" />
-        </Form.Item>
-
-        <Form.Item
-          name="role"
-          label="身份"
-          rules={[{ required: true, message: '请选择身份！' }]}
-        >
-          <Select placeholder="请选择身份">
-            <Option value="user">普通用户</Option>
-            <Option value="admin">管理员</Option>
-          </Select>
         </Form.Item>
 
         <Form.Item wrapperCol={{ offset: 6, span: 18 }}>

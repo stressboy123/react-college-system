@@ -10,30 +10,31 @@ export type ResultCode = (typeof ResultCode)[keyof typeof ResultCode]
 
 // 统一返回格式（匹配后端Result类）
 export interface Result<T = unknown> {
-  code: ResultCode
-  message: string
-  data: T
+  success: boolean;
+  code: ResultCode;
+  msg: string;
+  data: T;
 }
 
 // 登录DTO（匹配后端LoginDTO）
 export interface LoginDTO {
-  username: string
-  password: string
+  username: string;
+  password: string;
 }
 
 // 注册DTO（匹配后端RegisterDTO）
 export interface RegisterDTO {
-  username: string
-  password: string
-  role: 'user' | 'admin' // 普通用户/管理员
+  username: string;
+  password: string;
+  nickname?: string;
 }
 
 // 登录返回结果（后端返回的用户信息）
-export interface LoginResponse {
-  token: string
-  userId: number
-  username: string
-  role: 'user' | 'admin'
+export interface UserInfo {
+  token: string;
+  username: string;
+  nickname?: string; // 新增nickname
+  role?: 'user' | 'admin'; // 暂时保留，后续可通过用户信息接口补充
 }
 
 // 院校类（匹配后端TCollege）

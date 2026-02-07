@@ -1,9 +1,9 @@
 import service from '@/utils/request'
 import type { AxiosResponse } from 'axios'
-import type { Result, LoginDTO, RegisterDTO, LoginResponse } from '@/types/api'
+import type { Result, LoginDTO, RegisterDTO } from '@/types/api'
 
 // 登录接口
-export const login = (data: LoginDTO): Promise<AxiosResponse<Result<LoginResponse>>> => {
+export const login = (data: LoginDTO): Promise<AxiosResponse<Result<string>>> => {
   return service({
     url: '/auth/login',
     method: 'post',
@@ -12,7 +12,7 @@ export const login = (data: LoginDTO): Promise<AxiosResponse<Result<LoginRespons
 }
 
 // 注册接口
-export const register = (data: RegisterDTO): Promise<AxiosResponse<Result<boolean>>> => {
+export const register = (data: RegisterDTO): Promise<AxiosResponse<Result<string>>> => {
   return service({
     url: '/auth/register',
     method: 'post',
@@ -20,7 +20,8 @@ export const register = (data: RegisterDTO): Promise<AxiosResponse<Result<boolea
   })
 }
 
-export const logout = (): Promise<AxiosResponse<Result<boolean>>> => {
+// 登出接口
+export const logout = (): Promise<AxiosResponse<Result<string>>> => {
   return service({
     url: '/auth/logout',
     method: 'post'

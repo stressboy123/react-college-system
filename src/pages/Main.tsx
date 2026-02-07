@@ -6,6 +6,7 @@ import MajorTable from '@/components/MajorTable'
 import { useUserStore } from '@/store/userStore'
 import { useNavigate } from 'react-router-dom'
 import { logout } from '@/api/authApi'
+import type { Result } from '@/types/api'
 
 const { Header, Content, Footer } = Layout
 const { Title, Text } = Typography
@@ -18,13 +19,20 @@ const Main = () => {
   // 退出登录
   const handleLogout = async () => {
     try {
-      await logout()
-      logoutStore()
-      localStorage.removeItem('token')
-      message.success('退出成功！')
-      navigate('/login')
+      const response = await logout()
+      const result: Result<string> = response.data
+      
+      if (result.success && result.code === 200) {
+        logoutStore()
+        localStorage.removeItem('token')
+        message.success(result.msg || '退出成功！')
+        navigate('/login')
+      } else {
+        message.error(result.msg || '退出失败')
+      }
     } catch (err) {
       console.error('退出失败：', err)
+      message.error('退出失败，请稍后重试')
     }
   }
 
@@ -36,7 +44,7 @@ const Main = () => {
           院校专业查询系统
         </Title>
         <Space>
-          <Text>当前登录：{user?.username}（{user?.role === 'admin' ? '管理员' : '普通用户'}）</Text>
+          <Text>当前登录：{user?.nickname || user?.username}</Text>
           <Button type="text" icon={<LogoutOutlined />} onClick={handleLogout}>
             退出登录
           </Button>

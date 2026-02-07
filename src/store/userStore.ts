@@ -1,14 +1,14 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { LoginResponse } from '@/types/api'
+import type { UserInfo } from '@/types/api'
 
 interface UserState {
-  user: LoginResponse | null
-  isLogin: boolean
-  // 登录
-  login: (userInfo: LoginResponse) => void
+  user: UserInfo | null;
+  isLogin: boolean;
+  // 登录（存储token和用户名）
+  login: (token: string, username: string, nickname?: string) => void;
   // 退出登录
-  logout: () => void
+  logout: () => void;
 }
 
 export const useUserStore = create<UserState>()(
@@ -17,7 +17,10 @@ export const useUserStore = create<UserState>()(
       user: null,
       isLogin: false,
 
-      login: (userInfo) => set({ user: userInfo, isLogin: true }),
+      login: (token, username, nickname) => set({ 
+        user: { token, username, nickname }, 
+        isLogin: true 
+      }),
 
       logout: () => set({ user: null, isLogin: false })
     }),
