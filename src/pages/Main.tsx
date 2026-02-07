@@ -1,28 +1,36 @@
-import { useState } from 'react';
-import { Layout, Button, Space, Typography, Divider } from 'antd';
-import { LogoutOutlined } from '@ant-design/icons';
-import CollegeTable from '../components/CollegeTable';
-import MajorTable from '../components/MajorTable';
-import { useUserStore } from '../store/userStore';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react'
+import { Layout, Button, Space, Typography, Divider, message } from 'antd'
+import { LogoutOutlined } from '@ant-design/icons'
+import CollegeTable from '@/components/CollegeTable'
+import MajorTable from '@/components/MajorTable'
+import { useUserStore } from '@/store/userStore'
+import { useNavigate } from 'react-router-dom'
+import { logout } from '@/api/authApi'
 
-const { Header, Content, Footer } = Layout;
-const { Title, Text } = Typography;
+const { Header, Content, Footer } = Layout
+const { Title, Text } = Typography
 
 const Main = () => {
-  const [activeTab, setActiveTab] = useState<'college' | 'major'>('college'); // 切换查大学/专业
-  const { user, logout } = useUserStore();
-  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<'college' | 'major'>('college')
+  const { user, logout: logoutStore } = useUserStore()
+  const navigate = useNavigate()
 
   // 退出登录
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+  const handleLogout = async () => {
+    try {
+      await logout()
+      logoutStore()
+      localStorage.removeItem('token')
+      message.success('退出成功！')
+      navigate('/login')
+    } catch (err) {
+      console.error('退出失败：', err)
+    }
+  }
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      {/* 头部：用户信息 + 退出 */}
+      {/* 头部 */}
       <Header style={{ backgroundColor: 'white', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Title level={3} style={{ margin: 0 }}>
           院校专业查询系统
@@ -35,7 +43,7 @@ const Main = () => {
         </Space>
       </Header>
 
-      {/* 内容区：切换按钮 + 表格 */}
+      {/* 内容区 */}
       <Content style={{ padding: '24px', backgroundColor: '#f5f5f5' }}>
         <div style={{ 
           maxWidth: 1200, 
@@ -43,7 +51,7 @@ const Main = () => {
           backgroundColor: 'white', 
           padding: 24, 
           borderRadius: 8,
-          marginTop: 40 // 屏幕中间偏上，不置顶
+          marginTop: 40 
         }}>
           {/* 切换按钮 */}
           <Space style={{ marginBottom: 24 }}>
@@ -74,7 +82,7 @@ const Main = () => {
         院校专业查询系统 ©{new Date().getFullYear()}
       </Footer>
     </Layout>
-  );
-};
+  )
+}
 
-export default Main;
+export default Main

@@ -1,39 +1,36 @@
-import { useState } from 'react';
-import { Button, Form, Input, message, Typography } from 'antd';
-import { UserOutlined, LockOutlined } from '@ant-design/icons';
-import { Link, useNavigate } from 'react-router-dom';
-import { useUserStore } from '../store/userStore';
-import { mockUsers } from '../utils/mockData';
-import { User } from '../types';
+import { useState } from 'react'
+import { Button, Form, Input, message, Typography } from 'antd'
+import { UserOutlined, LockOutlined } from '@ant-design/icons'
+import { Link, useNavigate } from 'react-router-dom'
+import { useUserStore } from '@/store/userStore'
+import { login } from '@/api/authApi'
+import type { LoginDTO, LoginResponse, Result } from '@/types/api'
 
-const { Title, Text } = Typography;
+const { Title, Text } = Typography
 
 const LoginForm = () => {
-  const [loading, setLoading] = useState(false);
-  const login = useUserStore((state) => state.login);
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false)
+  const loginStore = useUserStore((state) => state.login)
+  const navigate = useNavigate()
 
-  // 表单提交
-  const handleSubmit = async (values: { username: string; password: string }) => {
-    setLoading(true);
+  const handleSubmit = async (values: LoginDTO) => {
+    setLoading(true)
     try {
-      // 模拟后端校验（实际替换为axios请求）
-      const matchUser = mockUsers.find(
-        (user) => user.username === values.username && user.password === values.password
-      );
-      if (matchUser) {
-        login(matchUser);
-        message.success('登录成功！');
-        navigate('/'); // 跳主页面
-      } else {
-        message.error('账号或密码错误！');
+      const response = await login(values)
+      const result: Result<LoginResponse> = response.data 
+      
+      if (result.code === 200) {
+        loginStore(result.data)
+        localStorage.setItem('token', result.data.token)
+        message.success('登录成功！')
+        navigate('/')
       }
-    } catch (error) {
-      message.error('登录失败，请重试！');
+    } catch (err) {
+      console.error('登录失败：', err)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <div style={{ maxWidth: 400, margin: '0 auto', padding: 24 }}>
@@ -73,7 +70,7 @@ const LoginForm = () => {
         </Form.Item>
       </Form>
     </div>
-  );
-};
+  )
+}
 
-export default LoginForm;
+export default LoginForm

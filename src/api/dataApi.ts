@@ -1,19 +1,21 @@
-import request from '@/utils/request';
-import { Result, TMajor, TCollege } from '@/types/api';
+import service from '@/utils/request'
+import type { AxiosResponse } from 'axios'
+import type { Result, TCollege, TMajor, PageParams, PageResult } from '@/types/api'
 
-// 获取所有学院列表（示例GET请求，路径需和后端DataController对齐）
-export function getCollegeList() {
-  return request<Result<TCollege[]>>({
+// 院校分页列表
+export const getCollegeList = (params: PageParams): Promise<AxiosResponse<Result<PageResult<TCollege>>>> => {
+  return service({
     url: '/data/college/list',
-    method: 'get'
-  });
+    method: 'get',
+    params
+  })
 }
 
-// 根据学院ID获取专业列表（示例GET请求，带参数）
-export function getMajorListByCollegeId(collegeId: number) {
-  return request<Result<TMajor[]>>({
+// 专业分页列表
+export const getMajorList = (params: PageParams): Promise<AxiosResponse<Result<PageResult<TMajor>>>> => {
+  return service({
     url: '/data/major/list',
     method: 'get',
-    params: { collegeId } // URL参数
-  });
+    params
+  })
 }

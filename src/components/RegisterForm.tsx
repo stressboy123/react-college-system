@@ -1,54 +1,48 @@
-import { useState } from 'react';
-import { Button, Form, Input, message, Typography, Select } from 'antd';
-import { UserOutlined, LockOutlined } from '@ant-design/icons';
-import { Link, useNavigate } from 'react-router-dom';
-import { useUserStore } from '../store/userStore';
-import { mockUsers } from '../utils/mockData';
-import { User } from '../types';
+import { useState } from 'react'
+import { Button, Form, Input, message, Typography, Select } from 'antd'
+import { UserOutlined, LockOutlined } from '@ant-design/icons'
+import { Link, useNavigate } from 'react-router-dom'
+import { register } from '@/api/authApi'
+import type { RegisterDTO } from '@/types/api'
 
-const { Title } = Typography;
-const { Option } = Select;
+const { Title } = Typography
+const { Option } = Select
 
 const RegisterForm = () => {
-  const [loading, setLoading] = useState(false);
-  const register = useUserStore((state) => state.register);
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
 
   // 表单提交
   const handleSubmit = async (values: {
-    username: string;
-    password: string;
-    confirmPwd: string;
-    role: 'user' | 'admin';
+    username: string
+    password: string
+    confirmPwd: string
+    role: 'user' | 'admin'
   }) => {
-    setLoading(true);
+    setLoading(true)
     try {
       // 前端校验
       if (values.password !== values.confirmPwd) {
-        message.error('两次密码不一致！');
-        return;
-      }
-      if (mockUsers.some((user) => user.username === values.username)) {
-        message.error('账号已存在！');
-        return;
+        message.error('两次密码不一致！')
+        return
       }
 
-      // 模拟注册（实际替换为axios请求）
-      const newUser: User = {
-        id: Date.now().toString(),
+      // 构造注册参数
+      const registerData: RegisterDTO = {
         username: values.username,
         password: values.password,
-        role: values.role,
-      };
-      register(newUser);
-      message.success('注册成功，请登录！');
-      navigate('/login'); // 跳登录页
-    } catch (error) {
-      message.error('注册失败，请重试！');
+        role: values.role
+      }
+
+      await register(registerData)
+      message.success('注册成功，请登录！')
+      navigate('/login') // 跳登录页
+    } catch (err) {
+      console.error('注册失败：', err)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <div style={{ maxWidth: 400, margin: '0 auto', padding: 24 }}>
@@ -107,7 +101,7 @@ const RegisterForm = () => {
         </Form.Item>
       </Form>
     </div>
-  );
-};
+  )
+}
 
-export default RegisterForm;
+export default RegisterForm

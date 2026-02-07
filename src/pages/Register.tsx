@@ -1,7 +1,7 @@
-import RegisterForm from '../components/RegisterForm';
-import { Layout } from 'antd';
+import RegisterForm from '@/components/RegisterForm'
+import { Layout } from 'antd'
 
-const { Content } = Layout;
+const { Content } = Layout
 
 const Register = () => {
   return (
@@ -12,7 +12,7 @@ const Register = () => {
         </div>
       </Content>
     </Layout>
-  );
-};
+  )
+}
 
-export default Register;
+export default Register

@@ -1,31 +1,29 @@
-import { create } from 'zustand';
-import { User } from '../types';
+import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
+import type { LoginResponse } from '@/types/api'
 
 interface UserState {
-  user: User | null;
-  isLogin: boolean;
+  user: LoginResponse | null
+  isLogin: boolean
   // 登录
-  login: (userInfo: User) => void;
+  login: (userInfo: LoginResponse) => void
   // 退出登录
-  logout: () => void;
-  // 注册
-  register: (newUser: User) => void;
+  logout: () => void
 }
 
-export const useUserStore = create<UserState>((set) => ({
-  user: null,
-  isLogin: false,
+export const useUserStore = create<UserState>()(
+  persist(
+    (set) => ({
+      user: null,
+      isLogin: false,
 
-  // 登录方法
-  login: (userInfo) => set({ user: userInfo, isLogin: true }),
+      login: (userInfo) => set({ user: userInfo, isLogin: true }),
 
-  // 退出登录
-  logout: () => set({ user: null, isLogin: false }),
-
-  // 注册方法（模拟，实际需调后端）
-  register: (newUser) => set((state) => ({
-    // 注：实际注册需后端入库，这里仅前端临时存储
-    user: newUser,
-    isLogin: false, // 注册后需重新登录
-  })),
-}));
+      logout: () => set({ user: null, isLogin: false })
+    }),
+    {
+      name: 'user-storage', // 本地存储key
+      partialize: (state) => ({ user: state.user }) // 只持久化user
+    }
+  )
+)

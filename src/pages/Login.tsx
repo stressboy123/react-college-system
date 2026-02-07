@@ -1,7 +1,7 @@
-import LoginForm from '../components/LoginForm';
-import { Layout } from 'antd';
+import LoginForm from '@/components/LoginForm'
+import { Layout } from 'antd'
 
-const { Content } = Layout;
+const { Content } = Layout
 
 const Login = () => {
   return (
@@ -12,7 +12,7 @@ const Login = () => {
         </div>
       </Content>
     </Layout>
-  );
-};
+  )
+}
 
-export default Login;
+export default Login

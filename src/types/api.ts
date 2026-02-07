@@ -1,44 +1,67 @@
-// 后端ResultCode枚举（需和后端com.gdut.entity.ResultCode完全对齐）
-export enum ResultCode {
-  SUCCESS = 200, // 示例值，替换为后端实际枚举值
-  FAIL = 500,
-  UNAUTHORIZED = 401
+// 替换enum为const对象，避免erasableSyntaxOnly报错
+export const ResultCode = {
+  SUCCESS: 200,
+  FAIL: 500,
+  UNAUTHORIZED: 401,
+  NOT_FOUND: 404
+} as const
+
+export type ResultCode = (typeof ResultCode)[keyof typeof ResultCode]
+
+// 统一返回格式（匹配后端Result类）
+export interface Result<T = unknown> {
+  code: ResultCode
+  message: string
+  data: T
 }
 
-// 后端统一返回格式Result（匹配com.gdut.entity.Result）
-export interface Result<T = any> {
-  code: ResultCode; // 枚举值
-  message: string; // 返回提示信息
-  data: T; // 业务数据
-}
-
-// 登录传参（匹配com.gdut.entity.LoginDTO）
+// 登录DTO（匹配后端LoginDTO）
 export interface LoginDTO {
-  username: string; // 示例字段，替换为后端实际字段（如账号/手机号/邮箱）
-  password: string; // 密码
-  // 可选：验证码、记住我等字段
+  username: string
+  password: string
 }
 
-// 注册传参（匹配com.gdut.entity.RegisterDTO）
+// 注册DTO（匹配后端RegisterDTO）
 export interface RegisterDTO {
-  username: string;
-  password: string;
-  email?: string; // 示例可选字段
-  phone?: string; // 示例可选字段
-  // 其他后端要求的注册字段
+  username: string
+  password: string
+  role: 'user' | 'admin' // 普通用户/管理员
 }
 
-// 专业类（匹配com.gdut.entity.TMajor）
-export interface TMajor {
-  id: number; // 专业ID
-  majorName: string; // 专业名称
-  collegeId: number; // 所属学院ID
-  // 其他字段：创建时间、状态等
+// 登录返回结果（后端返回的用户信息）
+export interface LoginResponse {
+  token: string
+  userId: number
+  username: string
+  role: 'user' | 'admin'
 }
 
-// 大学/学院类（匹配com.gdut.entity.TCollege）
+// 院校类（匹配后端TCollege）
 export interface TCollege {
-  id: number; // 学院ID
-  collegeName: string; // 学院名称
-  // 其他字段：学校ID、备注等
+  id: number
+  collegeName: string
+  province?: string
+  type?: string // 综合/理工等
+  level?: string // 本科/专科
+}
+
+// 专业类（匹配后端TMajor）
+export interface TMajor {
+  id: number
+  majorName: string
+  collegeId: number // 关联院校ID
+  degree?: string // 学士/硕士
+  category?: string // 工学/理学
+}
+
+// 分页参数
+export interface PageParams {
+  current: number
+  pageSize: number
+}
+
+// 分页返回结果
+export interface PageResult<T> {
+  list: T[]
+  total: number
 }
