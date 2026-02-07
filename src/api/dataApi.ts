@@ -5,16 +5,16 @@ import type { Result, TCollege, TMajor, PageParams, PageResult } from '@/types/a
 // 院校分页列表
 export const getCollegeList = (params: PageParams): Promise<AxiosResponse<Result<PageResult<TCollege>>>> => {
   return service({
-    url: '/data/college/list',
+    url: '/api/data/college/page',
     method: 'get',
-    params
+    params // 分页参数（current/pageSize）会自动拼到URL后
   })
 }
 
 // 专业分页列表
 export const getMajorList = (params: PageParams): Promise<AxiosResponse<Result<PageResult<TMajor>>>> => {
   return service({
-    url: '/data/major/list',
+    url: '/api/data/major/page',
     method: 'get',
     params
   })
