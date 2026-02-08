@@ -7,7 +7,7 @@ export const getCollegeList = (params: PageParams): Promise<AxiosResponse<Result
   return service({
     url: '/api/data/college/page',
     method: 'get',
-    params // 分页参数（current/pageSize）会自动拼到URL后
+    params
   })
 }
 

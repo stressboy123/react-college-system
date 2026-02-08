@@ -38,7 +38,7 @@ service.interceptors.response.use(
     const res = response.data
     // 非200状态码抛错，但仍返回完整response
     if (res.code !== 200) {
-      message.error(res.message || '请求失败')
+      message.error(res.msg || '请求失败')
     }
     return response // 返回完整的AxiosResponse，而非Result
   },
