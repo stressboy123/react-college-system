@@ -4,38 +4,39 @@ import { UserOutlined, LockOutlined } from '@ant-design/icons'
 import { Link, useNavigate } from 'react-router-dom'
 import { useUserStore } from '@/store/userStore'
 import { login } from '@/api/authApi'
-import type { LoginDTO, Result } from '@/types/api'
+import type { LoginDTO, Result, LoginResponseVO } from '@/types/api'
 
 const { Title, Text } = Typography
-
 const LoginForm = () => {
   const [loading, setLoading] = useState(false)
   const loginStore = useUserStore((state) => state.login)
   const navigate = useNavigate()
 
+  // ========== 登录提交逻辑 ==========
   const handleSubmit = async (values: LoginDTO) => {
     setLoading(true)
     try {
       const response = await login(values)
-      const result: Result<string> = response.data 
+      const result: Result<LoginResponseVO> = response.data 
       
       if (result.success && result.code === 200) {
-        // 后端返回的data是token字符串，存储token+用户名
-        loginStore(result.data, values.username)
-        localStorage.setItem('token', result.data)
+        loginStore(result.data) // 直接传入VO，包含token/用户名/昵称/角色
+        localStorage.setItem('token', result.data.token) // 存储token
         message.success(result.msg || '登录成功！')
-        navigate('/')
+        navigate('/') // 跳转到主页面
       } else {
+        // 后端返回失败，提示错误信息
         message.error(result.msg || '登录失败')
       }
     } catch (err) {
       console.error('登录失败：', err)
-      message.error('登录失败，请检查账号密码')
+      message.error('网络异常，登录失败')
     } finally {
       setLoading(false)
     }
   }
 
+  // 模板无修改，保留原有UI
   return (
     <div style={{ maxWidth: 400, margin: '0 auto', padding: 24 }}>
       <Title level={2} style={{ textAlign: 'center', marginBottom: 24 }}>
@@ -53,14 +54,12 @@ const LoginForm = () => {
         >
           <Input prefix={<UserOutlined />} placeholder="请输入账号" />
         </Form.Item>
-
         <Form.Item
           name="password"
           rules={[{ required: true, message: '请输入密码！' }]}
         >
           <Input.Password prefix={<LockOutlined />} placeholder="请输入密码" />
         </Form.Item>
-
         <Form.Item>
           <Button type="primary" htmlType="submit" loading={loading} block>
             登录
@@ -76,5 +75,4 @@ const LoginForm = () => {
     </div>
   )
 }
-
 export default LoginForm

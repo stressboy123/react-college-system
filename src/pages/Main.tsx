@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Layout, Button, Space, Typography, Divider, message } from 'antd'
-import { LogoutOutlined } from '@ant-design/icons'
+import { LogoutOutlined, SettingOutlined } from '@ant-design/icons'
 import CollegeTable from '@/components/CollegeTable'
 import MajorTable from '@/components/MajorTable'
 import { useUserStore } from '@/store/userStore'
@@ -13,10 +13,11 @@ const { Title, Text } = Typography
 
 const Main = () => {
   const [activeTab, setActiveTab] = useState<'college' | 'major'>('college')
-  const { user, logout: logoutStore } = useUserStore()
+  // ========== 获取用户信息+管理员判断 ==========
+  const { user, logout: logoutStore, isAdmin } = useUserStore()
   const navigate = useNavigate()
 
-  // 退出登录
+  // 退出登录（无修改）
   const handleLogout = async () => {
     try {
       const response = await logout()
@@ -38,20 +39,25 @@ const Main = () => {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      {/* 头部 */}
+      {/* 头部：添加角色显示+管理员功能显隐 */}
       <Header style={{ backgroundColor: 'white', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Title level={3} style={{ margin: 0 }}>
-          院校专业查询系统
+          高考志愿智能分析预测系统
         </Title>
         <Space>
-          <Text>当前登录：{user?.nickname || user?.username}</Text>
+          <Text>当前登录：{user?.nickname || user?.username}（{user?.roles[0] || '普通用户'}）</Text>
+          {/* ========== 权限控制：管理员专属功能（单角色场景始终隐藏） ========== */}
+          {isAdmin && (
+            <Button type="text" icon={<SettingOutlined />}>
+              系统管理
+            </Button>
+          )}
           <Button type="text" icon={<LogoutOutlined />} onClick={handleLogout}>
             退出登录
           </Button>
         </Space>
       </Header>
-
-      {/* 内容区 */}
+      {/* 内容区：可根据角色显隐表格/功能 */}
       <Content style={{ padding: '24px', backgroundColor: '#f5f5f5' }}>
         <div style={{ 
           maxWidth: 1200, 
@@ -78,19 +84,15 @@ const Main = () => {
               查专业
             </Button>
           </Space>
-
           <Divider />
-
-          {/* 表格区域 */}
+          {/* 表格区域：可根据角色控制是否显示 */}
           {activeTab === 'college' ? <CollegeTable /> : <MajorTable />}
         </div>
       </Content>
-
       <Footer style={{ textAlign: 'center' }}>
-        院校专业查询系统 ©{new Date().getFullYear()}
+        高考志愿智能分析预测系统 ©{new Date().getFullYear()}
       </Footer>
     </Layout>
   )
 }
-
 export default Main

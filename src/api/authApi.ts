@@ -1,9 +1,9 @@
 import service from '@/utils/request'
 import type { AxiosResponse } from 'axios'
-import type { Result, LoginDTO, RegisterDTO } from '@/types/api'
+import type { Result, LoginDTO, RegisterDTO, LoginResponseVO } from '@/types/api'
 
 // 登录接口
-export const login = (data: LoginDTO): Promise<AxiosResponse<Result<string>>> => {
+export const login = (data: LoginDTO): Promise<AxiosResponse<Result<LoginResponseVO>>> => {
   return service({
     url: '/auth/login',
     method: 'post',

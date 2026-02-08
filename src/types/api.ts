@@ -2,7 +2,9 @@ export const ResultCode = {
   SUCCESS: 200,
   FAIL: 500,
   UNAUTHORIZED: 401,
-  NOT_FOUND: 404
+  NOT_FOUND: 404,
+  USERNAME_EXISTS: 409,
+  ROLE_NOT_FOUND: 404
 } as const
 
 export type ResultCode = (typeof ResultCode)[keyof typeof ResultCode]
@@ -28,12 +30,12 @@ export interface RegisterDTO {
   nickname?: string;
 }
 
-// 登录返回结果（后端返回的用户信息）
-export interface UserInfo {
+// 登录返回结果
+export interface LoginResponseVO {
   token: string;
   username: string;
-  nickname?: string;
-  role?: 'user' | 'admin'; // 暂时保留，后续可通过用户信息接口补充
+  nickname: string;
+  roles: string[];
 }
 
 // 院校类（匹配后端TCollege实体）
