@@ -32,6 +32,7 @@ export interface RegisterDTO {
 
 // 登录返回结果
 export interface LoginResponseVO {
+  id: number;
   token: string;
   username: string;
   nickname: string;
