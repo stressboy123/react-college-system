@@ -1,23 +1,26 @@
 import { useState } from 'react'
 import { Layout, Button, Space, Typography, Divider, message } from 'antd'
-import { LogoutOutlined, SettingOutlined } from '@ant-design/icons'
-import CollegeTable from '@/components/CollegeTable'
-import MajorTable from '@/components/MajorTable'
+import { LogoutOutlined, QuestionOutlined, FileTextOutlined, SettingOutlined } from '@ant-design/icons'
 import { useUserStore } from '@/store/userStore'
 import { useNavigate } from 'react-router-dom'
 import { logout } from '@/api/authApi'
 import type { Result } from '@/types/api'
+import CollegeTable from '@/components/CollegeTable'
+import MajorTable from '@/components/MajorTable'
+import QuestionnaireFill from '@/components/questionnaire/QuestionnaireFill'
+import QuestionnaireMyAnswer from '@/components/questionnaire/QuestionnaireMyAnswer'
+import QuestionnaireAdmin from '@/components/questionnaire/QuestionnaireAdmin'
 
 const { Header, Content, Footer } = Layout
 const { Title, Text } = Typography
 
 const Main = () => {
-  const [activeTab, setActiveTab] = useState<'college' | 'major'>('college')
-  // ========== 获取用户信息+管理员判断 ==========
+  // 切换当前展示的功能模块：fill(填写问卷) / myAnswer(我的答卷) / admin(问卷管理) / college(查大学) / major(查专业)
+  const [activeModule, setActiveModule] = useState<'fill' | 'myAnswer' | 'admin' | 'college' | 'major'>('college')
   const { user, logout: logoutStore, isAdmin } = useUserStore()
   const navigate = useNavigate()
 
-  // 退出登录（无修改）
+  // 退出登录（原有逻辑保留）
   const handleLogout = async () => {
     try {
       const response = await logout()
@@ -37,27 +40,46 @@ const Main = () => {
     }
   }
 
+  // 渲染当前激活的模块
+  const renderActiveModule = () => {
+    switch (activeModule) {
+      case 'fill': return <QuestionnaireFill />;
+      case 'myAnswer': return <QuestionnaireMyAnswer />;
+      case 'admin': return <QuestionnaireAdmin />;
+      case 'college': return <CollegeTable />;
+      case 'major': return <MajorTable />;
+      default: return <QuestionnaireFill />;
+    }
+  }
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      {/* 头部：添加角色显示+管理员功能显隐 */}
+      {/* 头部：用户信息+退出+角色权限控制 */}
       <Header style={{ backgroundColor: 'white', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Title level={3} style={{ margin: 0 }}>
           高考志愿智能分析预测系统
         </Title>
         <Space>
-          <Text>当前登录：{user?.nickname || user?.username}（{user?.roles[0] || '普通用户'}）</Text>
-          {/* ========== 权限控制：管理员专属功能（单角色场景始终隐藏） ========== */}
+          <Text>当前登录：{user?.nickname || user?.username}（{user?.roles.join('/') || '普通用户'}）</Text>
+          {/* 管理员专属：问卷管理入口 */}
           {isAdmin && (
-            <Button type="text" icon={<SettingOutlined />}>
-              系统管理
+            <Button type="text" icon={<SettingOutlined />} onClick={() => setActiveModule('admin')}>
+              问卷管理
             </Button>
           )}
+          {/* 所有用户：问卷填写+我的答卷 */}
+          <Button type="text" icon={<QuestionOutlined />} onClick={() => setActiveModule('fill')}>
+            问卷填写
+          </Button>
+          <Button type="text" icon={<FileTextOutlined />} onClick={() => setActiveModule('myAnswer')}>
+            我的答卷
+          </Button>
           <Button type="text" icon={<LogoutOutlined />} onClick={handleLogout}>
             退出登录
           </Button>
         </Space>
       </Header>
-      {/* 内容区：可根据角色显隐表格/功能 */}
+      {/* 内容区：功能按钮+模块渲染 */}
       <Content style={{ padding: '24px', backgroundColor: '#f5f5f5' }}>
         <div style={{ 
           maxWidth: 1200, 
@@ -65,28 +87,28 @@ const Main = () => {
           backgroundColor: 'white', 
           padding: 24, 
           borderRadius: 8,
-          marginTop: 40 
+          marginTop: 20 
         }}>
-          {/* 切换按钮 */}
+          {/* 原有院校/专业查询切换按钮 */}
           <Space style={{ marginBottom: 24 }}>
             <Button
-              type={activeTab === 'college' ? 'primary' : 'default'}
-              onClick={() => setActiveTab('college')}
-              size="large"
+              type={activeModule === 'college' ? 'primary' : 'default'}
+              onClick={() => setActiveModule('college')}
+              size="middle"
             >
               查大学
             </Button>
             <Button
-              type={activeTab === 'major' ? 'primary' : 'default'}
-              onClick={() => setActiveTab('major')}
-              size="large"
+              type={activeModule === 'major' ? 'primary' : 'default'}
+              onClick={() => setActiveModule('major')}
+              size="middle"
             >
               查专业
             </Button>
           </Space>
           <Divider />
-          {/* 表格区域：可根据角色控制是否显示 */}
-          {activeTab === 'college' ? <CollegeTable /> : <MajorTable />}
+          {/* 渲染当前激活的功能模块 */}
+          {renderActiveModule()}
         </div>
       </Content>
       <Footer style={{ textAlign: 'center' }}>
@@ -95,4 +117,5 @@ const Main = () => {
     </Layout>
   )
 }
+
 export default Main
