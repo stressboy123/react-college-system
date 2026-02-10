@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Layout, Button, Space, Typography, Divider, message } from 'antd'
-import { LogoutOutlined, QuestionOutlined, FileTextOutlined, SettingOutlined } from '@ant-design/icons'
+import { LogoutOutlined, QuestionOutlined, FileTextOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons'
 import { useUserStore } from '@/store/userStore'
 import { useNavigate } from 'react-router-dom'
 import { logout } from '@/api/authApi'
@@ -10,17 +10,18 @@ import MajorTable from '@/components/MajorTable'
 import QuestionnaireFill from '@/components/questionnaire/QuestionnaireFill'
 import QuestionnaireMyAnswer from '@/components/questionnaire/QuestionnaireMyAnswer'
 import QuestionnaireAdmin from '@/components/questionnaire/QuestionnaireAdmin'
+import UserInfoForm from '@/components/userInfo/UserInfoForm'
 
 const { Header, Content, Footer } = Layout
 const { Title, Text } = Typography
 
 const Main = () => {
-  // 切换当前展示的功能模块：fill(填写问卷) / myAnswer(我的答卷) / admin(问卷管理) / college(查大学) / major(查专业)
-  const [activeModule, setActiveModule] = useState<'fill' | 'myAnswer' | 'admin' | 'college' | 'major'>('college')
+  // 切换当前展示的功能模块：fill(填写问卷) / myAnswer(我的答卷) / admin(问卷管理) / college(查大学) / major(查专业) / userInfo（用户信息）
+  const [activeModule, setActiveModule] = useState<'fill' | 'myAnswer' | 'admin' | 'college' | 'major' | 'userInfo'>('college')
   const { user, logout: logoutStore, isAdmin } = useUserStore()
   const navigate = useNavigate()
 
-  // 退出登录（原有逻辑保留）
+  // 退出登录
   const handleLogout = async () => {
     try {
       const response = await logout()
@@ -43,12 +44,13 @@ const Main = () => {
   // 渲染当前激活的模块
   const renderActiveModule = () => {
     switch (activeModule) {
+      case 'userInfo': return <UserInfoForm />;
       case 'fill': return <QuestionnaireFill />;
       case 'myAnswer': return <QuestionnaireMyAnswer />;
       case 'admin': return <QuestionnaireAdmin />;
       case 'college': return <CollegeTable />;
       case 'major': return <MajorTable />;
-      default: return <QuestionnaireFill />;
+      default: return <CollegeTable />;
     }
   }
 
@@ -61,6 +63,10 @@ const Main = () => {
         </Title>
         <Space>
           <Text>当前登录：{user?.nickname || user?.username}（{user?.roles.join('/') || '普通用户'}）</Text>
+          {/* 用户信息按钮（所有用户可见） */}
+          <Button type="text" icon={<UserOutlined />} onClick={() => setActiveModule('userInfo')}>
+            用户信息
+          </Button>
           {/* 管理员专属：问卷管理入口 */}
           {isAdmin && (
             <Button type="text" icon={<SettingOutlined />} onClick={() => setActiveModule('admin')}>
