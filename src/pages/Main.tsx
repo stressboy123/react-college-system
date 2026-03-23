@@ -1,24 +1,27 @@
 import { useState } from 'react'
 import { Layout, Button, Space, Typography, Divider, message } from 'antd'
-import { LogoutOutlined, QuestionOutlined, FileTextOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons'
+import { LogoutOutlined, QuestionOutlined, FileTextOutlined, SettingOutlined, UserOutlined, LineChartOutlined } from '@ant-design/icons'
 import { useUserStore } from '@/store/userStore'
 import { useNavigate } from 'react-router-dom'
 import { logout } from '@/api/authApi'
 import type { Result } from '@/types/api'
+import type { UserInfoDTO } from '@/types/userInfo'
+import { getUserInfoField } from '@/types/userInfo';
 import CollegeTable from '@/components/CollegeTable'
 import MajorTable from '@/components/MajorTable'
 import QuestionnaireFill from '@/components/questionnaire/QuestionnaireFill'
 import QuestionnaireMyAnswer from '@/components/questionnaire/QuestionnaireMyAnswer'
 import QuestionnaireAdmin from '@/components/questionnaire/QuestionnaireAdmin'
 import UserInfoForm from '@/components/userInfo/UserInfoForm'
+import PredictResult from '@/components/predict/PredictResult'
 
 const { Header, Content, Footer } = Layout
 const { Title, Text } = Typography
 
 const Main = () => {
-  // 切换当前展示的功能模块：fill(填写问卷) / myAnswer(我的答卷) / admin(问卷管理) / college(查大学) / major(查专业) / userInfo（用户信息）
-  const [activeModule, setActiveModule] = useState<'fill' | 'myAnswer' | 'admin' | 'college' | 'major' | 'userInfo'>('college')
-  const { user, logout: logoutStore, isAdmin } = useUserStore()
+  // 切换当前展示的功能模块：fill(填写问卷) / myAnswer(我的答卷) / admin(问卷管理) / college(查大学) / major(查专业) / userInfo（用户信息）/ predict（志愿预测）
+  const [activeModule, setActiveModule] = useState<'fill' | 'myAnswer' | 'admin' | 'college' | 'major' | 'userInfo' | 'predict'>('college')
+  const { user, logout: logoutStore, isAdmin, userInfo } = useUserStore()
   const navigate = useNavigate()
 
   // 退出登录
@@ -41,6 +44,45 @@ const Main = () => {
     }
   }
 
+  // 校验用户信息是否完善（预测功能前置条件）
+  const checkUserInfoComplete = (): boolean => {
+    if (!userInfo) {
+      message.warning('请先完善用户基本信息！', 2)
+      setActiveModule('userInfo')
+      return false
+    }
+
+    // 核心必填项（用keyof UserInfoDTO确保类型安全）
+    const requiredFields: Array<{ key: keyof UserInfoDTO; label: string }> = [
+      { key: 'realName', label: '真实姓名' },
+      { key: 'candidateProvince', label: '考生省份' },
+      { key: 'candidateYear', label: '考生年份' },
+      { key: 'gaokaoTotalScore', label: '高考总分' },
+      { key: 'provinceRank', label: '全省排名' },
+      { key: 'firstSubject', label: '首选科目' }
+    ]
+
+    // 修复：用工具函数获取字段值，避免索引签名
+    const emptyFields = requiredFields.filter(item => {
+      const value = getUserInfoField(userInfo, item.key);
+      return value === undefined || value === '' || value === null;
+    })
+
+    if (emptyFields.length > 0) {
+      message.warning(`请完善以下必填信息：${emptyFields.map(item => item.label).join('、')}`, 3)
+      setActiveModule('userInfo')
+      return false
+    }
+    return true
+  }
+
+  // 切换到预测模块（带前置校验）
+  const handleSwitchToPredict = () => {
+    if (checkUserInfoComplete()) {
+      setActiveModule('predict')
+    }
+  }
+
   // 渲染当前激活的模块
   const renderActiveModule = () => {
     switch (activeModule) {
@@ -50,6 +92,7 @@ const Main = () => {
       case 'admin': return <QuestionnaireAdmin />;
       case 'college': return <CollegeTable />;
       case 'major': return <MajorTable />;
+      case 'predict': return <PredictResult userInfo={userInfo} />;
       default: return <CollegeTable />;
     }
   }
@@ -110,6 +153,14 @@ const Main = () => {
               size="middle"
             >
               查专业
+            </Button>
+            <Button
+              type={activeModule === 'predict' ? 'primary' : 'default'}
+              onClick={handleSwitchToPredict}
+              size="middle"
+              icon={<LineChartOutlined />}
+            >
+              志愿预测
             </Button>
           </Space>
           <Divider />
