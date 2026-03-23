@@ -21,6 +21,10 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:11451',
         changeOrigin: true,
+      },
+      '/excel': {
+        target: 'http://localhost:11451',
+        changeOrigin: true,
       }
     }
   }

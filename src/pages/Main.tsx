@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Layout, Button, Space, Typography, Divider, message } from 'antd'
-import { LogoutOutlined, QuestionOutlined, FileTextOutlined, SettingOutlined, UserOutlined, LineChartOutlined } from '@ant-design/icons'
+import { LogoutOutlined, QuestionOutlined, FileTextOutlined, SettingOutlined, UserOutlined, LineChartOutlined, UploadOutlined } from '@ant-design/icons'
 import { useUserStore } from '@/store/userStore'
 import { useNavigate } from 'react-router-dom'
 import { logout } from '@/api/authApi'
@@ -14,13 +14,14 @@ import QuestionnaireMyAnswer from '@/components/questionnaire/QuestionnaireMyAns
 import QuestionnaireAdmin from '@/components/questionnaire/QuestionnaireAdmin'
 import UserInfoForm from '@/components/userInfo/UserInfoForm'
 import PredictResult from '@/components/predict/PredictResult'
+import ExcelImport from '@/components/excel/ExcelImport'
 
 const { Header, Content, Footer } = Layout
 const { Title, Text } = Typography
 
 const Main = () => {
-  // 切换当前展示的功能模块：fill(填写问卷) / myAnswer(我的答卷) / admin(问卷管理) / college(查大学) / major(查专业) / userInfo（用户信息）/ predict（志愿预测）
-  const [activeModule, setActiveModule] = useState<'fill' | 'myAnswer' | 'admin' | 'college' | 'major' | 'userInfo' | 'predict'>('college')
+  // 切换当前展示的功能模块：fill(填写问卷) / myAnswer(我的答卷) / admin(问卷管理) / college(查大学) / major(查专业) / userInfo（用户信息）/ predict（志愿预测）/ excel（Excel导入）
+  const [activeModule, setActiveModule] = useState<'fill' | 'myAnswer' | 'admin' | 'college' | 'major' | 'userInfo' | 'predict'| 'excel'>('college')
   const { user, logout: logoutStore, isAdmin, userInfo } = useUserStore()
   const navigate = useNavigate()
 
@@ -93,6 +94,7 @@ const Main = () => {
       case 'college': return <CollegeTable />;
       case 'major': return <MajorTable />;
       case 'predict': return <PredictResult userInfo={userInfo} />;
+      case 'excel': return <ExcelImport />;
       default: return <CollegeTable />;
     }
   }
@@ -162,6 +164,17 @@ const Main = () => {
             >
               志愿预测
             </Button>
+            {/* Excel导入按钮（仅管理员可见） */}
+            {isAdmin && (
+              <Button
+                type={activeModule === 'excel' ? 'primary' : 'default'}
+                onClick={() => setActiveModule('excel')}
+                size="middle"
+                icon={<UploadOutlined />}
+              >
+                Excel数据导入
+              </Button>
+            )}
           </Space>
           <Divider />
           {/* 渲染当前激活的功能模块 */}
